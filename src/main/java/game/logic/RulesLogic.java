@@ -5,9 +5,6 @@ import java.util.regex.Pattern;
 
 //Class for realization of rules logic
 public class RulesLogic {
-    public static boolean rule0_isNotEmpty(String password) {
-        return !password.isEmpty();
-    }
     public static boolean rule1_fiveCharacters(String password) {
         return password.length() >= 5;
     }
