@@ -1,36 +1,39 @@
 package game.logic;
 
+import java.util.List;
 import java.util.LinkedList;
+import java.util.Queue;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PasswordProcessor {
-    private RulesSequence rulesSequence;
+    private Queue<Rule> qRules;
     private LinkedList<Rule> openedRules;
     public PasswordProcessor() {
-        rulesSequence = new RulesSequence();
+        qRules = RulesSequence.GetRulesQueue();
         openedRules = new LinkedList<Rule>();
         getNextRule();
     }
     private void getNextRule() {
-        if (!rulesSequence.isEmpty())
-            openedRules.add(rulesSequence.takeNewRule());
+        if (!qRules.isEmpty())
+            openedRules.add(qRules.remove());
     }
     private Stream<Boolean> checkAllRules(String password) {
         return openedRules.stream().map(rule -> rule.match(password));
     }
     private void process(String password) {
-        if (checkAllRules(password).allMatch(rule -> rule)) {
+        while (checkAllRules(password).allMatch(rule -> rule) && !qRules.isEmpty()) {
             getNextRule();
         }
     }
-    private String[] getRulesStatus(String password) {
+    private LinkedList<String> getRulesStatus(String password) {
         return openedRules.stream().map(rule -> {
             if (rule.match(password))
-                return "+ " + rule.Description;
-            return "- " + rule.Description;
-        }).toArray(String[]::new);
+                return "+ " + rule.description;
+            return "- " + rule.description;
+        }).collect(Collectors.toCollection(LinkedList<String>::new));
     }
-    public String[] processAndGetStatus(String password) {
+    public List<String> processAndGetStatus(String password) {
         this.process(password);
         return this.getRulesStatus(password);
     }
