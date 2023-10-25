@@ -4,13 +4,13 @@ import java.util.function.Predicate;
 
 //Class that provides work with predicates from string.
 public class Rule {
-    public final String Description;
+    public final String description;
     private final Predicate<String> matchRule;
     public Rule(Predicate<String> iMatcher, String iDescription) {
         matchRule = iMatcher;
-        Description = iDescription;
+        description = iDescription;
     }
-    public Boolean match(String password) {
+    public boolean match(String password) {
         return matchRule.test(password);
     }
 }

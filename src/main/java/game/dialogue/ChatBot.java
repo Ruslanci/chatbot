@@ -1,28 +1,40 @@
 package game.dialogue;
-import game.logic.RulesChecker;
 import java.util.Scanner;
-
+import game.logic.*;
+import java.util.List;
 public class ChatBot {
-    public static void main(String[] args) {
+    private PasswordProcessor passwordProcessor;
 
-        System.out.println("Добро пожаловать! Я чат-бот.");
-        System.out.println("Для начала разговора введите /start");
-
+    public ChatBot() {
+        this.passwordProcessor = new PasswordProcessor();
     }
-    private void chatBotStart() {
+
+    public void startChat() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Я чатбот, который позволяет вам играть в Password Game! Для подробной помощи введите /help.");
-        System.out.println("Игрок, введите пароль: ");
+        System.out.println("Welcome to the Password Game! Please, enter a password: ");
         String password = scanner.nextLine();
+        while (!passwordProcessor.isFinished()) {
+            List<String> status = passwordProcessor.processAndGetStatus(password);
 
+
+            if (status.contains("-")) {
+                System.out.print("Please enter a password: ");
+                password = scanner.nextLine();
+                status = passwordProcessor.processAndGetStatus(password);
+
+                System.out.println("Updated Rule Status:");
+                status.forEach(System.out::println);
+            } else {
+                System.out.println("All rules have been satisfied.");
+            }
+        }
+
+        System.out.println("Congratulations! You've passed all the rules.");
+        scanner.close();
     }
 
-    private void chatBotHelp() {
-        System.out.println("Помощь...");
-    }
-
-    private void chatBotError() {
-        System.out.println("Извините, я не понимаю ваш запрос. Введите /help для помощи.");
+    public static void main(String[] args) {
+        ChatBot chatBot = new ChatBot();
+        chatBot.startChat();
     }
 }
