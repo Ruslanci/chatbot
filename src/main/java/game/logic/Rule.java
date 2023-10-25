@@ -10,7 +10,7 @@ public class Rule {
         matchRule = iMatcher;
         description = iDescription;
     }
-    public boolean match(String password) {
+    public Boolean match(String password) {
         return matchRule.test(password);
     }
 }

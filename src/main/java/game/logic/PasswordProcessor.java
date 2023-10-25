@@ -17,6 +17,7 @@ public class PasswordProcessor {
     private void getNextRule() {
         if (!qRules.isEmpty())
             openedRules.add(qRules.remove());
+
     }
 
     public boolean isFinished() {
