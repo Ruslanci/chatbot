@@ -17,6 +17,11 @@ public class PasswordProcessor {
     private void getNextRule() {
         if (!qRules.isEmpty())
             openedRules.add(qRules.remove());
+
+    }
+
+    public boolean isFinished() {
+        return openedRules.isEmpty();
     }
     private Stream<Boolean> checkAllRules(String password) {
         return openedRules.stream().map(rule -> rule.match(password));
