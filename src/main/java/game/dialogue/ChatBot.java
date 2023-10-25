@@ -20,6 +20,8 @@ public class ChatBot {
             if (status.contains("-")) {
                 System.out.print("Please enter a password: ");
                 password = scanner.nextLine();
+
+                // doesnt work properly
                 status = passwordProcessor.processAndGetStatus(password);
 
                 System.out.println("Updated Rule Status:");
