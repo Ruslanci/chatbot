@@ -15,26 +15,26 @@ public class LogicTest {
     @Test
     public void rule1_Test() {
         for (int i = 0; i < 1000; i++) {
-            Assert.assertEquals(true, RulesLogic.rule1_fiveCharacters(RandomString(5)));
-            Assert.assertEquals(false, RulesLogic.rule1_fiveCharacters(RandomString(4)));
+            Assert.assertTrue(RulesLogic.rule1_fiveCharacters(RandomString(5)));
+            Assert.assertFalse(RulesLogic.rule1_fiveCharacters(RandomString(4)));
         }
     }
     @Test
     public void rule2_Test() {
         for (char currentCharCode = 0; currentCharCode < 65535; currentCharCode++) {
             if (currentCharCode >= 48 && currentCharCode <= 57)
-                Assert.assertEquals(true, RulesLogic.rule2_includesDigits(new String(new char[] {currentCharCode})));
+                Assert.assertTrue(RulesLogic.rule2_includesDigits(new String(new char[]{currentCharCode})));
             else
-                Assert.assertEquals(false, RulesLogic.rule2_includesDigits(new String(new char[] {currentCharCode})));
+                Assert.assertFalse(RulesLogic.rule2_includesDigits(new String(new char[]{currentCharCode})));
         }
     }
     @Test
     public void rule3_Test() {
         for (char currentCharCode = 0; currentCharCode < 65535; currentCharCode++) {
             if (currentCharCode >= 65 && currentCharCode <= 90)
-                Assert.assertEquals(true, RulesLogic.rule3_includesUpperCase(new String(new char[] {currentCharCode})));
+                Assert.assertTrue(RulesLogic.rule3_includesUpperCase(new String(new char[]{currentCharCode})));
             else
-                Assert.assertEquals(false, RulesLogic.rule3_includesUpperCase(new String(new char[] {currentCharCode})));
+                Assert.assertFalse(RulesLogic.rule3_includesUpperCase(new String(new char[]{currentCharCode})));
         }
     }
 
@@ -42,9 +42,9 @@ public class LogicTest {
     public void rule4_Test() {
         for (char currentCharCode = 0; currentCharCode < 65535; currentCharCode++) {
             if ((currentCharCode >= 65 && currentCharCode <= 90) || (currentCharCode >= 97 && currentCharCode <= 122) || (currentCharCode >= 48 && currentCharCode <= 57))
-                Assert.assertEquals(false, RulesLogic.rule4_includesSpecial(new String(new char[] {currentCharCode})));
+                Assert.assertFalse(RulesLogic.rule4_includesSpecial(new String(new char[]{currentCharCode})));
             else
-                Assert.assertEquals(true, RulesLogic.rule4_includesSpecial(new String(new char[] {currentCharCode})));
+                Assert.assertTrue(RulesLogic.rule4_includesSpecial(new String(new char[]{currentCharCode})));
         }
     }
 }
