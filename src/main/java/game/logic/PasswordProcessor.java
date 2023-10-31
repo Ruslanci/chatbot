@@ -13,10 +13,6 @@ public class PasswordProcessor {
         rulesStatus = new LinkedList<>();
     }
 
-    public boolean isFinished() {
-        return qRules.isEmpty();
-    }
-
     public List<String> processAndGetStatus(String password) {
         rulesStatus.clear();
 
