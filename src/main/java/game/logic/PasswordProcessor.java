@@ -3,43 +3,34 @@ package game.logic;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PasswordProcessor {
     private Queue<Rule> qRules;
-    private LinkedList<Rule> openedRules;
+    List<String> rulesStatus;
+
     public PasswordProcessor() {
         qRules = RulesSequence.GetRulesQueue();
-        openedRules = new LinkedList<Rule>();
-        getNextRule();
-    }
-    private void getNextRule() {
-        if (!qRules.isEmpty())
-            openedRules.add(qRules.remove());
-
+        rulesStatus = new LinkedList<>();
     }
 
-    public boolean isFinished() {
-        return openedRules.isEmpty();
-    }
-    private Stream<Boolean> checkAllRules(String password) {
-        return openedRules.stream().map(rule -> rule.match(password));
-    }
-    private void process(String password) {
-        while (checkAllRules(password).allMatch(rule -> rule) && !qRules.isEmpty()) {
-            getNextRule();
-        }
-    }
-    private LinkedList<String> getRulesStatus(String password) {
-        return openedRules.stream().map(rule -> {
-            if (rule.match(password))
-                return "+ " + rule.description;
-            return "- " + rule.description;
-        }).collect(Collectors.toCollection(LinkedList<String>::new));
-    }
     public List<String> processAndGetStatus(String password) {
-        this.process(password);
-        return this.getRulesStatus(password);
+        rulesStatus.clear();
+
+        for (Rule rule : qRules) {
+            boolean ruleSatisfied = rule.match(password);
+
+            rulesStatus.add((ruleSatisfied ? "+ " : "- ") + rule.description);
+        }
+
+        return rulesStatus;
+    }
+
+    public boolean RulesSatisfied() {
+        for (String str : rulesStatus) {
+            if (str.contains("-")) {
+                return false;
+            }
+        }
+        return true;
     }
 }

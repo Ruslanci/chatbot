@@ -7,8 +7,8 @@ public class Rule {
     public final String description;
     private final Predicate<String> matchRule;
     public Rule(Predicate<String> iMatcher, String iDescription) {
-        matchRule = iMatcher;
-        description = iDescription;
+        this.matchRule = iMatcher;
+        this.description = iDescription;
     }
     public Boolean match(String password) {
         return matchRule.test(password);
