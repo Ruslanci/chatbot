@@ -3,20 +3,38 @@ import java.util.Scanner;
 import game.logic.*;
 import java.util.List;
 public class ChatBot {
-    private PasswordProcessor passwordProcessor;
+    final private PasswordProcessor passwordProcessor;
 
     public ChatBot() {
         this.passwordProcessor = new PasswordProcessor();
     }
 
-    public void startChat() {
+    public void StartGame() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the Password Game! Please, enter /start to play the game!");
 
+        while (true) {
+            String input = scanner.nextLine();
+
+            if ("/start".equals(input)) {
+                PlayGame(scanner);
+                break;
+            } else if ("/help".equals(input)) {
+                System.out.println("This is a password game. You must type a password and press ENTER.");
+            } else {
+                System.out.println("Invalid command. Type /start to play or /help for instructions.");
+            }
+        }
+
+        scanner.close();
+    }
+
+    private void PlayGame(Scanner scanner) {
         while (true) {
             System.out.println("Welcome to the Password Game! Please, enter a password: ");
             String password = scanner.nextLine();
 
-            List<String> rulesStatus = passwordProcessor.processAndGetStatus(password);
+            List<String> rulesStatus = passwordProcessor.ProcessAndGetStatus(password);
             boolean rulesSatisfied = passwordProcessor.RulesSatisfied();
 
             if (rulesSatisfied) {
@@ -27,12 +45,11 @@ public class ChatBot {
             System.out.println("Updated Rule Status:");
             rulesStatus.forEach(System.out::println);
         }
-
-        scanner.close();
     }
+
 
     public static void main(String[] args) {
         ChatBot chatBot = new ChatBot();
-        chatBot.startChat();
+        chatBot.StartGame();
     }
 }

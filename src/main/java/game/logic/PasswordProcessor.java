@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class PasswordProcessor {
-    private Queue<Rule> qRules;
+    final private Queue<Rule> qRules;
     List<String> rulesStatus;
 
     public PasswordProcessor() {
@@ -13,11 +13,11 @@ public class PasswordProcessor {
         rulesStatus = new LinkedList<>();
     }
 
-    public List<String> processAndGetStatus(String password) {
+    public List<String> ProcessAndGetStatus(String password) {
         rulesStatus.clear();
 
         for (Rule rule : qRules) {
-            boolean ruleSatisfied = rule.match(password);
+            boolean ruleSatisfied = rule.Match(password);
 
             rulesStatus.add((ruleSatisfied ? "+ " : "- ") + rule.description);
         }
