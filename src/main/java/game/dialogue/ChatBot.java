@@ -11,27 +11,23 @@ public class ChatBot {
 
     public void startChat() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the Password Game! Please, enter a password: ");
-        String password = scanner.nextLine();
-        while (!passwordProcessor.isFinished()) {
-            List<String> status = passwordProcessor.processAndGetStatus(password);
 
+        while (true) {
+            System.out.println("Welcome to the Password Game! Please, enter a password: ");
+            String password = scanner.nextLine();
 
-            if (status.contains("-")) {
-                System.out.print("Please enter a password: ");
-                password = scanner.nextLine();
+            List<String> rulesStatus = passwordProcessor.processAndGetStatus(password);
+            boolean rulesSatisfied = passwordProcessor.RulesSatisfied();
 
-                // doesnt work properly
-                status = passwordProcessor.processAndGetStatus(password);
-
-                System.out.println("Updated Rule Status:");
-                status.forEach(System.out::println);
-            } else {
-                System.out.println("All rules have been satisfied.");
+            if (rulesSatisfied) {
+                System.out.println("Congratulations! You've passed all the rules.");
+                break;
             }
+
+            System.out.println("Updated Rule Status:");
+            rulesStatus.forEach(System.out::println);
         }
 
-        System.out.println("Congratulations! You've passed all the rules.");
         scanner.close();
     }
 
