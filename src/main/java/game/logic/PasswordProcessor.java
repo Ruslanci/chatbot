@@ -13,11 +13,11 @@ public class PasswordProcessor {
         rulesStatus = new LinkedList<>();
     }
 
-    public List<String> ProcessAndGetStatus(String password) {
+    public List<String> processAndGetStatus(String password) {
         rulesStatus.clear();
 
         for (Rule rule : qRules) {
-            boolean ruleSatisfied = rule.Match(password);
+            boolean ruleSatisfied = rule.match(password);
 
             rulesStatus.add((ruleSatisfied ? "+ " : "- ") + rule.description);
         }
@@ -25,7 +25,7 @@ public class PasswordProcessor {
         return rulesStatus;
     }
 
-    public boolean RulesSatisfied() {
+    public boolean rulesSatisfied() {
         for (String str : rulesStatus) {
             if (str.contains("-")) {
                 return false;

@@ -2,7 +2,6 @@ package game.logic;
 
 import java.util.function.Predicate;
 
-//Class that provides work with predicates from string.
 public class Rule {
     public final String description;
     private final Predicate<String> matchRule;
@@ -10,7 +9,7 @@ public class Rule {
         this.matchRule = iMatcher;
         this.description = iDescription;
     }
-    public Boolean Match(String password) {
+    public Boolean match(String password) {
         return matchRule.test(password);
     }
 }
