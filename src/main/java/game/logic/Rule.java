@@ -1,15 +1,5 @@
 package game.logic;
-
-import java.util.function.Predicate;
-
-public class Rule {
-    public final String description;
-    private final Predicate<String> matchRule;
-    public Rule(Predicate<String> iMatcher, String iDescription) {
-        this.matchRule = iMatcher;
-        this.description = iDescription;
-    }
-    public Boolean match(String password) {
-        return matchRule.test(password);
-    }
+public interface Rule {
+    public Boolean match(String password);
+    public String getDescription();
 }

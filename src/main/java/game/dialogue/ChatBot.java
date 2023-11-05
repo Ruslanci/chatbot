@@ -34,8 +34,8 @@ public class ChatBot {
             System.out.println("Welcome to the Password Game! Please, enter a password: ");
             String password = scanner.nextLine();
 
-            List<String> rulesStatus = passwordProcessor.ProcessAndGetStatus(password);
-            boolean rulesSatisfied = passwordProcessor.RulesSatisfied();
+            List<String> rulesStatus = passwordProcessor.processAndGetStatus(password);
+            boolean rulesSatisfied = passwordProcessor.isFinished();
 
             if (rulesSatisfied) {
                 System.out.println("Congratulations! You've passed all the rules.");
