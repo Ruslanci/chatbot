@@ -23,12 +23,17 @@
             <artifactId>telegrambots</artifactId>
             <version>6.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-abilities</artifactId>
+            <version>6.8.0</version>
+        </dependency>
 
     </dependencies>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>game.dialogue.ChatBot</mainClass>
+        <mainClass>game.telegram.ChatBot</mainClass>
     </properties>
 
     <build>
@@ -40,7 +45,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>game.dialogue.ChatBot</mainClass>
+                            <mainClass>game.core.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
