@@ -9,7 +9,7 @@ public class ChatBot {
         this.passwordProcessor = new PasswordProcessor();
     }
 
-    public void StartGame() {
+    public void startGame() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to the Password Game! Please, enter /start to play the game!");
 
@@ -17,7 +17,7 @@ public class ChatBot {
             String input = scanner.nextLine();
 
             if ("/start".equals(input)) {
-                PlayGame(scanner);
+                playGame(scanner);
                 break;
             } else if ("/help".equals(input)) {
                 System.out.println("This is a password game. You must type a password and press ENTER.");
@@ -29,7 +29,7 @@ public class ChatBot {
         scanner.close();
     }
 
-    private void PlayGame(Scanner scanner) {
+    private void playGame(Scanner scanner) {
         while (true) {
             System.out.println("Welcome to the Password Game! Please, enter a password: ");
             String password = scanner.nextLine();
@@ -50,6 +50,6 @@ public class ChatBot {
 
     public static void main(String[] args) {
         ChatBot chatBot = new ChatBot();
-        chatBot.StartGame();
+        chatBot.startGame();
     }
 }
