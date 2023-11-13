@@ -9,19 +9,20 @@ import java.util.stream.Stream;
 public class PasswordProcessor {
     private Queue<Rule> unopennedRules;
     private LinkedList<Rule> openedRules;
+    private Boolean completed;
     public PasswordProcessor() {
-        unopennedRules = RulesSequence.GetRulesQueue();
+        unopennedRules = RulesSequence.getRulesQueue();
         openedRules = new LinkedList<Rule>();
+        completed = false;
         getNextRule();
     }
     private void getNextRule() {
         if (!unopennedRules.isEmpty())
             openedRules.add(unopennedRules.remove());
-
     }
 
     public boolean isFinished() {
-        return unopennedRules.isEmpty();
+        return (unopennedRules.isEmpty() && completed);
     }
     private Stream<Boolean> checkAllRules(String password) {
         return openedRules.stream().map(rule -> rule.match(password));
@@ -30,6 +31,7 @@ public class PasswordProcessor {
         while (checkAllRules(password).allMatch(rule -> rule) && !unopennedRules.isEmpty()) {
             getNextRule();
         }
+        completed = (checkAllRules(password).allMatch(rule -> rule));
     }
     private LinkedList<String> getRulesStatus(String password) {
         return openedRules.stream().map(rule -> {

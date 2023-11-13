@@ -1,15 +1,10 @@
 import game.logic.Rule;
-import game.logic.RulesLogic;
 import game.logic.rules.DigitsIncludingRule;
 import game.logic.rules.FiveCharactersRule;
 import game.logic.rules.SpecialIncludingRule;
 import game.logic.rules.UpperCaseIncludingRule;
 import org.junit.Test;
 import org.junit.Assert;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
-import java.nio.charset.Charset;
 
 public class LogicTest {
     Rule rule1 = new FiveCharactersRule();
