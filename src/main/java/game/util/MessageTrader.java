@@ -1,10 +1,10 @@
-package game.core;
+package game.util;
 
 public class MessageTrader {
     private String message;
-    private boolean valueSet = false;
-    synchronized String get() {
-        while (!valueSet) {
+    private boolean hasMessage = false;
+    public synchronized String get() {
+        while (!hasMessage) {
             try {
                 wait();
             }
@@ -12,12 +12,12 @@ public class MessageTrader {
                 System.out.println(e.getMessage());
             }
         }
-        valueSet = false;
+        hasMessage = false;
         notify();
         return message;
     }
-    synchronized void put(String message) {
-        while(valueSet) {
+    public synchronized void put(String message) {
+        while(hasMessage) {
             try {
                 wait();
             }
@@ -26,7 +26,7 @@ public class MessageTrader {
             }
         }
         this.message = message;
-        valueSet = true;
+        hasMessage = true;
         notify();
     }
 }

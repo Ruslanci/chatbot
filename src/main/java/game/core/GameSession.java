@@ -1,20 +1,20 @@
 package game.core;
 import game.logic.PasswordProcessor;
 import game.telegram.ChatBot;
+import game.util.MessageTrader;
 
 import java.util.LinkedList;
-import java.util.Scanner;
 
-public class Session implements Runnable {
+public class GameSession implements Runnable {
     private final PasswordProcessor processor;
     private final MessageTrader channel;
     private final Long chatId;
     private final ChatBot holder;
-    public Session(ChatBot currentHolder, Long currentChatId) {
-        processor = new PasswordProcessor();
-        channel = new MessageTrader();
-        chatId = currentChatId;
-        holder = currentHolder;
+    public GameSession(ChatBot holder, Long chatId) {
+        this.processor = new PasswordProcessor();
+        this.channel = new MessageTrader();
+        this.chatId = chatId;
+        this.holder = holder;
     }
     public void putMessage(String message) {
         channel.put(message);
@@ -25,10 +25,12 @@ public class Session implements Runnable {
 
     @Override
     public void run() {
-        while(!processor.isFinished()) {
+        while(!processor.isFinished() && !Thread.currentThread().isInterrupted()) {
             holder.sendText("Enter your password:", chatId);
             this.checkPassword(channel.get()).forEach(msg -> holder.sendText(msg, chatId));
         }
-        holder.sendText("Congratulation!", chatId);
+        if (!Thread.currentThread().isInterrupted()) {
+            holder.sendText("Congratulation!", chatId);
+        }
     }
 }

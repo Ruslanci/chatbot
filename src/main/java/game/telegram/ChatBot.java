@@ -1,28 +1,24 @@
 package game.telegram;
 
-import game.core.MessageTrader;
-import game.core.Session;
+import game.core.GameSession;
+import game.core.SessionThread;
 import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Exchanger;
 
 import static org.telegram.abilitybots.api.objects.Flag.TEXT;
 import static org.telegram.abilitybots.api.objects.Locality.ALL;
 import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 public class ChatBot extends AbilityBot {
-    private static String tokenPath = "PasswordGameBotToken";
-    private static String namePath = "PasswordGameBotName";
-    private final Map<Long, Session> sessionMap;
+    private static final String tokenPath = "PasswordGameBotToken";
+    private static final String namePath = "PasswordGameBotName";
+    private SessionThread sessionThread;
 
     public ChatBot() {
         super(System.getenv(tokenPath), System.getenv(namePath));
-        sessionMap = new HashMap<Long, Session>();
+        sessionThread = null;
     }
 
     @Override
@@ -48,10 +44,10 @@ public class ChatBot extends AbilityBot {
                 .locality(ALL)
                 .privacy(PUBLIC)
                 .action(ctx -> {
-                    if (!sessionMap.containsKey(ctx.chatId()))
+                    if (sessionThread == null || !sessionThread.isAlive())
                         sendText("You are not in session, type /start to play", ctx.chatId());
                     else
-                        sessionMap.get(ctx.chatId()).putMessage(ctx.update().getMessage().getText());
+                        sessionThread.putMessage(ctx.update().getMessage().getText());
                 })
                 .build();
     }
@@ -61,9 +57,20 @@ public class ChatBot extends AbilityBot {
                 .locality(ALL)
                 .privacy(PUBLIC)
                 .action(ctx -> {
-                    Session currentSession = new Session(this, ctx.chatId());
-                    sessionMap.put(ctx.chatId(), currentSession);
-                    new Thread(currentSession).start();
+                    sessionThread = new SessionThread(new GameSession(this, ctx.chatId()));
+                    sessionThread.start();
+                })
+                .build();
+    }
+
+    public Ability endGame() {
+        return Ability.builder()
+                .name("end")
+                .locality(ALL)
+                .privacy(PUBLIC)
+                .action(ctx -> {
+                    sessionThread.interrupt();
+                    sendText("Your are not in session anymore, type /start to play again", ctx.chatId());
                 })
                 .build();
     }
