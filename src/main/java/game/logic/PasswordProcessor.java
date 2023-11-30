@@ -6,29 +6,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PasswordProcessor {
-    private Queue<Rule> unopennedRules;
+    private Queue<Rule> unopenedRules;
     private LinkedList<Rule> openedRules;
     private Boolean completed;
     public PasswordProcessor() {
-        unopennedRules = RulesSequence.getRulesQueue();
+        unopenedRules = RulesSequence.getRulesQueue();
         openedRules = new LinkedList<Rule>();
         completed = false;
         getNextRule();
     }
 
     private void getNextRule() {
-        if (!unopennedRules.isEmpty())
-            openedRules.add(unopennedRules.remove());
+        if (!unopenedRules.isEmpty())
+            openedRules.add(unopenedRules.remove());
     }
 
     public boolean isFinished() {
-        return (unopennedRules.isEmpty() && completed);
+        return (unopenedRules.isEmpty() && completed);
     }
     private Stream<Boolean> checkAllRules(String password) {
         return openedRules.stream().map(rule -> rule.match(password));
     }
     private void process(String password) {
-        while (checkAllRules(password).allMatch(rule -> rule) && !unopennedRules.isEmpty()) {
+        while (checkAllRules(password).allMatch(rule -> rule) && !unopenedRules.isEmpty()) {
             getNextRule();
         }
         completed = (checkAllRules(password).allMatch(rule -> rule));
