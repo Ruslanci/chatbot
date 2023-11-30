@@ -14,12 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatBot extends AbilityBot {
-    private static final String tokenPath = "6114667694:AAGSk7z5Ww14pCl2JNcvs8h3gWOXW3mlJbY";
-    private static final String namePath = "Password_Games_bot";
+    private static final String tokenPath = "PasswordGameBotToken";
+    private static final String namePath = "PasswordGameBotName";
     private final Map<Long, GameSession> userSessions;
 
     public ChatBot() {
-        super(tokenPath, namePath);
+        super(System.getenv(tokenPath), System.getenv(namePath));
         userSessions = new HashMap<>();
     }
 
