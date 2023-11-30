@@ -39,9 +39,6 @@ public class ChatBot extends AbilityBot {
         }
     }
 
-    private GameSession getSession(Long userId, Long chatId) {
-        return userSessions.computeIfAbsent(userId, key -> new GameSession(this, chatId));
-    }
 
     public Ability readText() {
         return Ability.builder()
@@ -53,7 +50,7 @@ public class ChatBot extends AbilityBot {
                     Long userId = ctx.user().getId();
                     GameSession session = userSessions.get(userId);
 
-                    if (session == null || !session.isRunning()) {
+                    if (session == null) {
                         sendText("You are not in a session, type /start to play", ctx.chatId());
                     } else {
                         session.putMessage(ctx.update().getMessage().getText());
@@ -64,7 +61,7 @@ public class ChatBot extends AbilityBot {
 
     
 
-    public Ability startGame() {
+    public Ability startGameCommand() {
         return Ability.builder()
                 .name("start")
                 .locality(ALL)
@@ -73,23 +70,22 @@ public class ChatBot extends AbilityBot {
                     Long userId = ctx.user().getId();
                     Long chatId = ctx.chatId();
 
-                    GameSession existingSession = userSessions.remove(userId);
+                    GameSession existingSession = userSessions.get(userId);
+
+                    
+
                     if (existingSession != null) {
-                        existingSession.stop();
-                    }
-
-                    GameSession session = getSession(userId, chatId);
-
-                    if (session.isRunning()) {
                         sendText("You are already in a session.", chatId);
                     } else {
+                        GameSession session = new GameSession(this, chatId, userId);
+                        userSessions.put(userId, session);
                         session.start();
                     }
                 })
                 .build();
     }
 
-    public Ability endGame() {
+    public Ability endGameCommand() {
         return Ability.builder()
                 .name("end")
                 .locality(ALL)
@@ -98,14 +94,16 @@ public class ChatBot extends AbilityBot {
                     Long userId = ctx.user().getId();
                     Long chatId = ctx.chatId();
                     
-                    GameSession session = userSessions.remove(userId);
-                    if (session != null) {
-                        session.stop();
-                        sendText("Game session ended. Type /start to play again.", chatId);
-                    } else {
-                        sendText("You are not in a session.", chatId);
-                    }
+                    endGame(userId, chatId);
                 })
                 .build();
+    }
+    public void endGame(Long userId, Long chatId) {
+        GameSession session = userSessions.remove(userId);
+        if (session != null) {
+            sendText("Game session ended. Type /start to play again.", chatId);
+        } else {
+            sendText("You are not in a session.", chatId);
+        }
     }
 }
