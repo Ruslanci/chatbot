@@ -4,17 +4,31 @@ import game.telegram.ChatBot;
 import game.util.MessageTrader;
 
 import java.util.LinkedList;
+import java.util.concurrent.CompletableFuture;
 
-public class GameSession implements Runnable {
+public class GameSession {
     private final PasswordProcessor processor;
     private final MessageTrader channel;
     private final Long chatId;
-    private final ChatBot holder;
-    public GameSession(ChatBot holder, Long chatId) {
+    private final ChatBot chatBot;
+    private boolean running;
+    public GameSession(ChatBot chatBot, Long chatId) {
         this.processor = new PasswordProcessor();
         this.channel = new MessageTrader();
         this.chatId = chatId;
-        this.holder = holder;
+        this.chatBot = chatBot;
+        this.running = false;
+    }
+    public void start() {
+        running = true;
+        runSession();
+    }
+    public void stop() {
+        running = false;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
     public void putMessage(String message) {
         channel.put(message);
@@ -23,14 +37,21 @@ public class GameSession implements Runnable {
         return processor.processAndGetStatus(password);
     }
 
-    @Override
-    public void run() {
-        while(!processor.isFinished() && !Thread.currentThread().isInterrupted()) {
-            holder.sendText("Enter your password:", chatId);
-            this.checkPassword(channel.get()).forEach(msg -> holder.sendText(msg, chatId));
-        }
-        if (!Thread.currentThread().isInterrupted()) {
-            holder.sendText("Congratulation!", chatId);
-        }
+    public void runSession() {
+        CompletableFuture.runAsync(() -> {
+            while (!processor.isFinished() && running) {
+                chatBot.sendText("Enter your password:", chatId);
+                String userEnteredPassword = channel.get();
+
+                if (userEnteredPassword != null) {
+                    this.checkPassword(userEnteredPassword).forEach(msg -> chatBot.sendText(msg, chatId));
+                }
+            }
+
+            if (running) {
+                chatBot.sendText("Congratulations! Type /start to begin a new game.", chatId);
+                running = false;
+            }
+        });
     }
 }
