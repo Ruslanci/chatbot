@@ -1,6 +1,5 @@
 package game.logic;
 
-import java.util.List;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -9,20 +8,21 @@ import java.util.stream.Stream;
 public class PasswordProcessor {
     private Queue<Rule> unopennedRules;
     private LinkedList<Rule> openedRules;
-    private Boolean complited;
+    private Boolean completed;
     public PasswordProcessor() {
-        unopennedRules = RulesSequence.GetRulesQueue();
+        unopennedRules = RulesSequence.getRulesQueue();
         openedRules = new LinkedList<Rule>();
-        complited = false;
+        completed = false;
         getNextRule();
     }
+
     private void getNextRule() {
         if (!unopennedRules.isEmpty())
             openedRules.add(unopennedRules.remove());
     }
 
     public boolean isFinished() {
-        return (unopennedRules.isEmpty() && complited);
+        return (unopennedRules.isEmpty() && completed);
     }
     private Stream<Boolean> checkAllRules(String password) {
         return openedRules.stream().map(rule -> rule.match(password));
@@ -31,7 +31,7 @@ public class PasswordProcessor {
         while (checkAllRules(password).allMatch(rule -> rule) && !unopennedRules.isEmpty()) {
             getNextRule();
         }
-        complited = (checkAllRules(password).allMatch(rule -> rule));
+        completed = (checkAllRules(password).allMatch(rule -> rule));
     }
     private LinkedList<String> getRulesStatus(String password) {
         return openedRules.stream().map(rule -> {
