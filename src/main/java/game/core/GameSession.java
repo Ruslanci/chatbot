@@ -1,39 +1,61 @@
 package game.core;
+
 import game.logic.PasswordProcessor;
 import game.telegram.ChatBot;
-
+import java.sql.Timestamp;
 import java.util.LinkedList;
 
-public class GameSession {
-    private final PasswordProcessor processor;
-    private final Long chatId;
-    private final Long userId;
+// Represents a user's game session.
+public class GameSession implements GameSessionInterface {
 
-    private final ChatBot chatBot;
-    public GameSession(ChatBot chatBot, Long chatId, Long userId) {
-        this.processor = new PasswordProcessor();
-        this.chatId = chatId;
-        this.userId = userId;
-        this.chatBot = chatBot;
+  private final PasswordProcessor processor;
+  private final Long chatId;
+  private final Long userId;
+  private final String username;
+  private final DatabaseHandler database;
+  private final ChatBot chatBot;
+  private Timestamp startTime;
+
+  public GameSession(ChatBot chatBot, Long chatId, Long userId, String username, DatabaseHandler database) {
+    this.processor = new PasswordProcessor();
+    this.chatId = chatId;
+    this.userId = userId;
+    this.username = username;
+    this.chatBot = chatBot;
+    this.database = database;
+  }
+  public void onSessionStart() {
+    this.startTime = new Timestamp(System.currentTimeMillis());
+    chatBot.sendMessage("Enter a password: ", chatId);
+  }
+   /**Receives a new password from the user, checking it using checkPassword.
+   and then send the user the result of the examination.*/
+  public void onMessageReceived(String message) {
+
+    if (message != null) {
+      this.checkPassword(message).forEach(msg -> chatBot.sendMessage(msg, chatId));
     }
-    public void start() {
-        chatBot.sendText("Enter a password: ", chatId);
+    // processor.isFinished() returns whether or not the user satisfied all password conditions.
+    if (processor.isFinished()) {
+      onSessionEnd();
     }
 
-    public void putMessage(String message) {
-        String userEnteredPassword = message;
+  }
+  /** When the user completed the game, we need to store the duration it took him to finish.
+   A DatabaseHandler::saveGameSessionToDatabase is used.*/
+  public void onSessionEnd() {
+    Timestamp endTime = new Timestamp(System.currentTimeMillis());
+    long duration = endTime.getTime() - startTime.getTime();
+    database.saveGameSessionToDatabase(userId, username, duration);
+    chatBot.sendMessage("Congratulations, " + username + "! Type /leaderboard to see who's the best!", chatId);
+    chatBot.endGame(userId, chatId);
+  }
 
-        if (userEnteredPassword != null) {
-            this.checkPassword(userEnteredPassword).forEach(msg -> chatBot.sendText(msg, chatId));
-        }
-        if (processor.isFinished()) {
-            chatBot.sendText("Congratulations!", chatId);
-            chatBot.endGame(userId, chatId);
-        }
+  public LinkedList<String> checkPassword(String password) {
+    return processor.processAndGetStatus(password);
+  }
 
-    }
-    public LinkedList<String> checkPassword(String password) {
-        return processor.processAndGetStatus(password);
-    }
+
+
 
 }
