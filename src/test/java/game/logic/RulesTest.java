@@ -1,47 +1,83 @@
 package game.logic;
-import game.logic.rules.DigitsIncludingRule;
-import game.logic.rules.FiveCharactersRule;
-import game.logic.rules.SpecialIncludingRule;
-import game.logic.rules.UpperCaseIncludingRule;
+import game.logic.rules.*;
 import org.junit.Test;
 import org.junit.Assert;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 
 public class RulesTest {
-    Rule rule1 = new FiveCharactersRule();
-    Rule rule2 = new DigitsIncludingRule();
-    Rule rule3 = new UpperCaseIncludingRule();
-    Rule rule4 = new SpecialIncludingRule();
+    Rule lenghtRule = new FiveCharactersRule();
+    Rule digitRule = new DigitsIncludingRule();
+    Rule upperRule = new UpperCaseIncludingRule();
+    Rule specCharRule = new SpecialIncludingRule();
+    Rule colorRule = new ColorfulRule();
+    Rule dateRule = new CurrentDateIncludingRule();
+    Rule palindromeRule = new PalindromeRule();
+    Rule emojiRule = new EmojiIncludingRule();
     @Test
     public void fiveCharactersRuleTestTrue() {
-        Assert.assertTrue(rule1.match("qwert"));
+        Assert.assertTrue(lenghtRule.match("qwert"));
     }
     @Test
     public void fiveCharactersRuleTestFalse() {
-        Assert.assertFalse(rule1.match("qwer"));
+        Assert.assertFalse(lenghtRule.match("qwer"));
     }
     @Test
     public void digitsIncludingRuleTestTrue() {
-        Assert.assertTrue(rule2.match("123"));
+        Assert.assertTrue(digitRule.match("123"));
     }
     @Test
     public void digitsIncludingRuleTestFalse() {
-        Assert.assertFalse(rule2.match("abc"));
+        Assert.assertFalse(digitRule.match("abc"));
     }
     @Test
     public void upperCaseIncludingRuleTestTrue() {
-        Assert.assertTrue(rule3.match("ABC"));
+        Assert.assertTrue(upperRule.match("ABC"));
     }
     @Test
     public void upperCaseIncludingRuleTestFalse() {
-        Assert.assertFalse(rule3.match("abc"));
+        Assert.assertFalse(upperRule.match("abc"));
     }
     @Test
     public void specialIncludingTestTrue() {
-        Assert.assertTrue(rule4.match("!@#$"));
+        Assert.assertTrue(specCharRule.match("!@#$"));
     }
     @Test
     public void specialIncludingTestFalse() {
-        Assert.assertFalse(rule4.match("1234"));
+        Assert.assertFalse(specCharRule.match("1234"));
+    }
+    @Test
+    public void colorfulTestTrue() {
+        Assert.assertTrue(colorRule.match("red"));
+    }
+    @Test
+    public void colorfulTestFalse() {
+        Assert.assertFalse(colorRule.match("qwer"));
+    }
+    @Test
+    public void currentDateIncludingTestTrue() {
+        Assert.assertTrue(dateRule.match(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+    }
+    @Test
+    public void currentDateIncludingTestFalse() {
+        Assert.assertFalse(dateRule.match("qwer"));
+    }
+    @Test
+    public void palindromeTestTrue() {
+        Assert.assertTrue(palindromeRule.match("DoroD"));
+    }
+    @Test
+    public void palindromeTestFalse() {
+        Assert.assertFalse(palindromeRule.match("Tempet"));
+    }
+    @Test
+    public void emojiTestTrue() {
+        Assert.assertTrue(emojiRule.match("\uD83D\uDE3C"));
+    }
+    @Test
+    public void emojiTestFalse() {
+        Assert.assertFalse(emojiRule.match("qwer"));
     }
 }

@@ -2,12 +2,21 @@ package game.logic.rules;
 
 import game.logic.Rule;
 
+import java.util.LinkedList;
+import java.util.Stack;
+
 
 public class PalindromeRule implements Rule {
   @Override
   public Boolean match(String password) {
-    String reversed = new StringBuilder(password).reverse().toString();
-    return password.equalsIgnoreCase(reversed);
+    for (int i = 0; i < password.length() / 2; i++) {
+      char left_ch = password.charAt(i);
+      char right_ch = password.charAt(password.length() - 1 - i);
+      if (left_ch != right_ch) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override
