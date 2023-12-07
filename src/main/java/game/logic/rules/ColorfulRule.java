@@ -10,7 +10,7 @@ public class ColorfulRule implements Rule {
 
   @Override
   public Boolean match(String password) {
-    return colorNames.stream().anyMatch(password::contains);
+    return colorNames.stream().anyMatch(password.toLowerCase()::contains);
   }
 
   @Override
