@@ -107,4 +107,8 @@ public class DatabaseHandler {
       e.printStackTrace();
     }
   }
+
+  public Connection getConnection() {
+    return connection;
+  }
 }

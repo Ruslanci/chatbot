@@ -26,13 +26,16 @@ public class GameSession implements GameSessionInterface {
   }
   public void onSessionStart() {
     this.startTime = new Timestamp(System.currentTimeMillis());
-    chatBot.sendMessage("Enter a password: ", chatId);
+    if (chatBot != null) {
+      chatBot.sendMessage("Enter a password: ", chatId);
+    }
   }
    /**Receives a new password from the user, checking it using checkPassword.
    and then send the user the result of the examination.*/
   public void onMessageReceived(String message) {
-
-    if (message != null) {
+    if (chatBot == null) {
+      this.checkPassword(message);
+    } else if (message != null) {
       this.checkPassword(message).forEach(msg -> chatBot.sendMessage(msg, chatId));
     }
     // processor.isFinished() returns whether or not the user satisfied all password conditions.
@@ -47,8 +50,11 @@ public class GameSession implements GameSessionInterface {
     Timestamp endTime = new Timestamp(System.currentTimeMillis());
     long duration = endTime.getTime() - startTime.getTime();
     database.saveGameSessionToDatabase(userId, username, duration);
-    chatBot.sendMessage("Congratulations, " + username + "! Type /leaderboard to see who's the best!", chatId);
-    chatBot.endGame(userId, chatId);
+    if (chatBot != null) {
+      chatBot.sendMessage(
+          "Congratulations, " + username + "! Type /leaderboard to see who's the best!", chatId);
+      chatBot.endGame(userId, chatId);
+    }
   }
 
   public LinkedList<String> checkPassword(String password) {
