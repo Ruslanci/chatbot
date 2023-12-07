@@ -42,14 +42,11 @@ public class GameSessionDurationTest {
 
     session.onMessageReceived("\uD83D\uDE0EE07-12-2023#redder#3202-21-70E\uD83D\uDE0E");
 
-    Thread.sleep(2000);
-
     long durationFromDatabase = getDurationFromDatabase(1L);
 
     assertTrue("Duration should be greater than the timeout", durationFromDatabase > timeout);
   }
 
-  // Helper method to retrieve the duration from the database
   private long getDurationFromDatabase(Long userId) {
     Connection connection = database.getConnection();
     try (PreparedStatement preparedStatement = connection.prepareStatement(
