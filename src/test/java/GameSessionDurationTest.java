@@ -1,11 +1,12 @@
 import game.core.DatabaseHandler;
-import game.core.GameSession;
+import game.core.sessions.GameSession;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 
+import game.core.sessions.SoloSession;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -33,14 +34,14 @@ public class GameSessionDurationTest {
   public void testSaveGameSessionWithDurationGreaterThanTimeout() throws InterruptedException {
     long timeout = 10000;
 
-    GameSession session = new GameSession(null, 1L, 1L, "TestUser", database);
+    GameSession session = new SoloSession(null, 1L, 1L, "TestUser", database);
 
     session.onSessionStart();
-    session.onMessageReceived("7-12-2023#redder#3202-21-70E");
+    session.onMessageReceived("7-12-2023#redder#3202-21-70E", 1L);
 
     Thread.sleep(timeout);
 
-    session.onMessageReceived("\uD83D\uDE0EE07-12-2023#redder#3202-21-70E\uD83D\uDE0E");
+    session.onMessageReceived("\uD83D\uDE0EE07-12-2023#redder#3202-21-70E\uD83D\uDE0E", 1L);
 
     long durationFromDatabase = getDurationFromDatabase(1L);
 

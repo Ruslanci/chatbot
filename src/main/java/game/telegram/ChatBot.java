@@ -5,10 +5,12 @@ import static org.telegram.abilitybots.api.objects.Locality.ALL;
 import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 import game.core.DatabaseHandler;
-import game.core.GameSession;
+import game.core.sessions.GameSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import game.core.sessions.SoloSession;
 import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,12 +25,11 @@ public class ChatBot extends AbilityBot {
   /** A hashmap userSessions keeps track of users and their game sessions.
    * It stores (userId, GameSession). */
   private final Map<Long, GameSession> userSessions;
-  private final DatabaseHandler database;
-
+  private final DatabaseHandler soloModeTable;
   public ChatBot() {
     super(System.getenv(tokenPath), System.getenv(namePath));
     userSessions = new HashMap<>();
-    database = new DatabaseHandler();
+    soloModeTable = new DatabaseHandler();
   }
 
   @Override
@@ -51,7 +52,7 @@ public class ChatBot extends AbilityBot {
           if (session == null) {
             sendMessage("You are not in a session, type /start to play", ctx.chatId());
           } else {
-            session.onMessageReceived(ctx.update().getMessage().getText());
+            session.onMessageReceived(ctx.update().getMessage().getText(), ctx.chatId());
           }
         })
         .build();
@@ -75,7 +76,7 @@ public class ChatBot extends AbilityBot {
           if (existingSession != null) {
             sendMessage("You are already in a session.", chatId);
           } else {
-            GameSession session = new GameSession(this, chatId, userId, username, database);
+            GameSession session = new SoloSession(this, chatId, userId, username, soloModeTable);
             userSessions.put(userId, session);
             session.onSessionStart();
           }
@@ -105,7 +106,7 @@ public class ChatBot extends AbilityBot {
         .privacy(PUBLIC)
         .action(ctx -> {
           Long chatId = ctx.chatId();
-          List<String> leaderboard = database.getFastestFinishers();
+          List<String> leaderboard = soloModeTable.getFastestFinishers();
 
           sendMessage("Top 5 players leaderboard:\n" + String.join("\n", leaderboard), chatId);
 
