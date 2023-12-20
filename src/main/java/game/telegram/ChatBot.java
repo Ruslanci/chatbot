@@ -13,7 +13,8 @@ import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ChatBot extends AbilityBot {
 
@@ -75,6 +76,7 @@ public class ChatBot extends AbilityBot {
           if (existingSession != null) {
             sendMessage("You are already in a session.", chatId);
           } else {
+            sendMessage("Enter a password: ", chatId);
             GameSession session = new GameSession(this, chatId, userId, username, database);
             userSessions.put(userId, session);
             session.onSessionStart();
@@ -112,6 +114,115 @@ public class ChatBot extends AbilityBot {
         })
         .build();
   }
+  public Ability receiveDuelCommand() {
+    return Ability.builder()
+        .name("duel")
+        .locality(ALL)
+        .privacy(PUBLIC)
+        .action(ctx -> {
+          Long userId = ctx.user().getId();
+          Long chatId = ctx.chatId();
+
+          GameSession session = userSessions.get(userId);
+          if (session != null && !session.isInDuelMode()) {
+            session.enableDuelMode();
+            sendMessage("Duel initiated! Looking for an opponent...", chatId);
+
+            initiateDuel(session);
+          } else {
+            sendMessage("You are already in a duel mode or not in a session.", chatId);
+          }
+        })
+        .build();
+  }
+
+  public Ability receiveDuelAcceptCommand() {
+    return Ability.builder()
+        .name("accept")
+        .locality(ALL)
+        .privacy(PUBLIC)
+        .action(ctx -> {
+          Long userId = ctx.user().getId();
+          Long chatId = ctx.chatId();
+
+          GameSession session = userSessions.get(userId);
+
+          sendMessage("Duel accepted!", chatId);
+
+          session.enableDuelMode();
+        })
+        .build();
+  }
+  public Ability receiveDuelDeclineCommand() {
+    return Ability.builder()
+        .name("decline")
+        .locality(ALL)
+        .privacy(PUBLIC)
+        .action(ctx -> {
+          Long userId = ctx.user().getId();
+          Long chatId = ctx.chatId();
+
+          sendMessage("Duel declined!", chatId);
+
+
+        })
+        .build();
+  }
+
+  private void initiateDuel(GameSession initiatorSession) {
+    GameSession opponentSession = findOpponent(initiatorSession);
+
+    if (opponentSession != null && !opponentSession.isInDuelMode()) {
+      sendDuelInvitation(initiatorSession, opponentSession);
+    } else {
+      sendMessage("No available opponents at the moment. Try again later.", initiatorSession.getChatId());
+      initiatorSession.disableDuelMode();
+      return;
+    }
+
+    new Timer().schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if (!opponentSession.isInDuelMode()) {
+          // The opponent declined the duel or didn't respond in time
+          sendMessage("Duel invitation declined or no response within the time limit.", initiatorSession.getChatId());
+          sendMessage("Duel invitation declined or no response within the time limit.", opponentSession.getChatId());
+          initiatorSession.disableDuelMode();
+          opponentSession.disableDuelMode();
+        } else {
+          sendMessage("Duel started!", initiatorSession.getChatId());
+          sendMessage("Duel started!", opponentSession.getChatId());
+          initiatorSession.setDuelOpponent(opponentSession);
+          opponentSession.setDuelOpponent(initiatorSession);
+          startDuel(initiatorSession, opponentSession);
+        }
+      }
+    }, 10000);
+  }
+
+
+  private GameSession findOpponent(GameSession initiatorSession) {
+    for (GameSession session : userSessions.values()) {
+      if (session != initiatorSession && !session.isInDuelMode()) {
+        return session;
+      }
+    }
+    return null;
+  }
+
+  private void sendDuelInvitation(GameSession initiatorSession, GameSession opponentSession) {
+    sendMessage("You've been invited to a duel by " + initiatorSession.getUsername() + "!", opponentSession.getChatId());
+    sendMessage("Type /accept to accept the duel or /decline to decline within 10 seconds.", opponentSession.getChatId());
+  }
+
+  private void startDuel(GameSession player1, GameSession player2) {
+    player1.resetSession();
+    player2.resetSession();
+
+    player1.onSessionStart();
+    player2.onSessionStart();
+  }
+
 
   /** Sending a message to the user.*/
   public void sendMessage(String text, Long chatId) {
