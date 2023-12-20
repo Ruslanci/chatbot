@@ -76,7 +76,7 @@ public class ChatBot extends AbilityBot {
           if (existingSession != null) {
             sendMessage("You are already in a session.", chatId);
           } else {
-            sendMessage("Enter a password: ", chatId);
+            sendMessage("Session started. Try /duel to try duelling mode or enter a password.", chatId);
             GameSession session = new GameSession(this, chatId, userId, username, database);
             userSessions.put(userId, session);
             session.onSessionStart();
@@ -110,6 +110,20 @@ public class ChatBot extends AbilityBot {
           List<String> leaderboard = database.getFastestFinishers();
 
           sendMessage("Top 5 players leaderboard:\n" + String.join("\n", leaderboard), chatId);
+
+        })
+        .build();
+  }
+  public Ability receiveDuelLeaderboardCommand() {
+    return Ability.builder()
+        .name("duel_leaderboard")
+        .locality(ALL)
+        .privacy(PUBLIC)
+        .action(ctx -> {
+          Long chatId = ctx.chatId();
+          List<String> leaderboard = database.getBestDuelists();
+
+          sendMessage("Top 5 duelists leaderboard:\n" + String.join("\n", leaderboard), chatId);
 
         })
         .build();
