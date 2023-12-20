@@ -16,7 +16,6 @@ public class GameSession implements GameSessionInterface {
   private final ChatBot chatBot;
   private Timestamp startTime;
   private boolean duelMode;
-  private boolean sessionStarted;
   private GameSession duelOpponent;
 
   public GameSession(ChatBot chatBot, Long chatId, Long userId, String username, DatabaseHandler database) {
@@ -27,11 +26,9 @@ public class GameSession implements GameSessionInterface {
     this.chatBot = chatBot;
     this.database = database;
     this.duelMode = false;
-    this.sessionStarted = false;
     this.duelOpponent = null;
   }
   public void onSessionStart() {
-    sessionStarted = true;
     this.startTime = new Timestamp(System.currentTimeMillis());
   }
    /**Receives a new password from the user, checking it using checkPassword.
@@ -53,20 +50,27 @@ public class GameSession implements GameSessionInterface {
   public void onSessionEnd() {
     long duration = getDuration();
 
-    database.saveGameSessionToDatabase(userId, username, duration);
+
     if (chatBot != null) {
 
       if (isInDuelMode()) {
         if (!duelOpponent.isFinished()) {
           chatBot.sendMessage("Congratulations, you've won the duel! Your duration: " + duration, chatId);
           disableDuelMode();
-          duelOpponent.disableDuelMode();
+
+          database.saveGameSessionToDatabase(userId, username, duration, true);
+
         } else {
           chatBot.sendMessage("You've lost the duel. Your duration: " + duration, chatId);
+          database.saveGameSessionToDatabase(userId, username, duration, false);
+          disableDuelMode();
+
         }
       } else {
+        database.saveGameSessionToDatabase(userId, username, duration, false);
+
         chatBot.sendMessage(
-            "Congratulations, " + username + "! Type /leaderboard to see who's the best!", chatId);
+            "Congratulations, " + username + "! Type /leaderboard or /duel_leaderboard to see who's the best!", chatId);
         chatBot.endGame(userId, chatId);
       }
 
@@ -87,18 +91,7 @@ public class GameSession implements GameSessionInterface {
     Timestamp endTime = new Timestamp(System.currentTimeMillis());
     return endTime.getTime() - startTime.getTime();
   }
-  public GameSession declareWinner(GameSession opponent) {
-    long duration1 = this.getDuration();
-    long duration2 = opponent.getDuration();
 
-    if (duration1 < duration2) {
-      return this;
-    } else if (duration2 < duration1) {
-      return opponent;
-    } else {
-      return null;
-    }
-  }
   public void setDuelOpponent(GameSession opponent) {
     this.duelOpponent = opponent;
   }
@@ -117,15 +110,9 @@ public class GameSession implements GameSessionInterface {
   public Long getChatId() {
     return chatId;
   }
-  public Long getUserId() {
-    return userId;
-  }
 
   public String getUsername() {
     return username;
-  }
-  public boolean isSessionStarted() {
-    return sessionStarted;
   }
 
   public boolean isFinished() {
