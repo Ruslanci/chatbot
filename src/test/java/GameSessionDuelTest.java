@@ -1,19 +1,16 @@
-import game.core.DatabaseHandler;
 import game.core.GameSession;
-
+import game.core.DatabaseHandler;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Connection;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.After;
-
-public class GameSessionDurationTest {
+public class GameSessionDuelTest {
   private DatabaseHandler database;
   @Before
   public void setUp() {
@@ -31,40 +28,52 @@ public class GameSessionDurationTest {
     }
   }
   @Test
-  public void testSaveGameSessionWithDurationGreaterThanTimeout() throws InterruptedException {
-    long timeout = 10000;
+  public void testDuelModeWin() throws InterruptedException {
 
-    GameSession session = new GameSession(null, 1L, 1L, "TestUser", database);
+    GameSession player1 = new GameSession(null, 1L, 1L, "player1", database);
+    player1.enableDuelMode();
 
-    session.onSessionStart();
-    session.onMessageReceived("7-12-2023#redder#3202-21-70E");
+    GameSession player2 = new GameSession(null, 2L, 2L, "player2", database);
+    player2.enableDuelMode();
+    player1.setDuelOpponent(player2);
+    player2.setDuelOpponent(player1);
 
-    Thread.sleep(timeout);
-    Thread.sleep(1000);
+    player1.onSessionStart();
+    player2.onSessionStart();
+
     String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     String currentDatePalindrome = new StringBuilder(currentDate).reverse().toString();
-    session.onMessageReceived("\uD83D\uDE0Ered0E#" + currentDate + currentDatePalindrome + "#E0der\uD83D\uDE0E");
+    player1.onMessageReceived("\uD83D\uDE0Ered0E#" + currentDate + currentDatePalindrome + "#E0der\uD83D\uDE0E");
+    Thread.sleep(1000);
 
-    long durationFromDatabase = getDurationFromDatabase(1L);
+    assertFalse(player1.isInDuelMode());
+    assertTrue(player2.isInDuelMode());
 
-    assertTrue("Duration should be greater than the timeout", durationFromDatabase > timeout);
+    player2.onMessageReceived("\uD83D\uDE0Ered0E#" + currentDate + currentDatePalindrome + "#E0der\uD83D\uDE0E");
+
+    assertFalse(player2.isInDuelMode());
+
+    int wonDuelsPlayer1 = getWonDuelsFromDatabase(1L);
+    int wonDuelsPlayer2 = getWonDuelsFromDatabase(2L);
+    assertEquals(1, wonDuelsPlayer1);
+    assertEquals(0, wonDuelsPlayer2);
   }
 
-  private long getDurationFromDatabase(Long userId) {
+  private int getWonDuelsFromDatabase(Long userId) {
     Connection connection = database.getConnection();
     try (PreparedStatement preparedStatement = connection.prepareStatement(
-        "SELECT duration FROM game_sessions WHERE user_id = ?"
+        "SELECT won_duels FROM game_sessions WHERE user_id = ?"
     )) {
       preparedStatement.setLong(1, userId);
       ResultSet resultSet = preparedStatement.executeQuery();
 
       if (resultSet.next()) {
-        return resultSet.getLong("duration");
+        return resultSet.getInt("won_duels");
       }
     } catch (SQLException e) {
       e.printStackTrace();
     }
 
-    return 0L;
+    return 0;
   }
 }

@@ -9,6 +9,7 @@ import game.core.GameSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.crypto.Data;
 import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -30,6 +31,11 @@ public class ChatBot extends AbilityBot {
     super(System.getenv(tokenPath), System.getenv(namePath));
     userSessions = new HashMap<>();
     database = new DatabaseHandler();
+  }
+  public ChatBot(String databaseUrl) {
+    super(System.getenv(tokenPath), System.getenv(namePath));
+    userSessions = new HashMap<>();
+    database = new DatabaseHandler(databaseUrl);
   }
 
   @Override
@@ -257,5 +263,9 @@ public class ChatBot extends AbilityBot {
     } else {
       sendMessage("You are not in a session.", chatId);
     }
+  }
+
+  public DatabaseHandler getDatabase() {
+    return database;
   }
 }

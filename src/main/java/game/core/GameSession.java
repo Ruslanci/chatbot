@@ -73,7 +73,23 @@ public class GameSession implements GameSessionInterface {
             "Congratulations, " + username + "! Type /leaderboard or /duel_leaderboard to see who's the best!", chatId);
         chatBot.endGame(userId, chatId);
       }
+    }
 
+    if (chatBot == null) {
+      if (isInDuelMode()) {
+        if (!duelOpponent.isFinished()) {
+          disableDuelMode();
+
+          database.saveGameSessionToDatabase(userId, username, duration, true);
+
+        } else {
+          database.saveGameSessionToDatabase(userId, username, duration, false);
+          disableDuelMode();
+
+        }
+      } else {
+        database.saveGameSessionToDatabase(userId, username, duration, false);
+      }
     }
   }
 

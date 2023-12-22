@@ -12,16 +12,19 @@ import java.util.List;
 public class DatabaseHandler {
   private final Connection connection;
   public DatabaseHandler() {
-    connection = initializeDatabase();
+    connection = initializeDatabase("jdbc:sqlite:src/main/java/game/database/game_sessions.db");
+  }
+
+  public DatabaseHandler(String databaseUrl) {
+    connection = initializeDatabase(databaseUrl);
   }
 
   /** Initializes the SQLite database and creates a table game_sessions if it doesn't exist.
    * @return the database connection.  */
-  private Connection initializeDatabase() {
+  private Connection initializeDatabase(String databaseUrl) {
     try {
       Class.forName("org.sqlite.JDBC");
-      Connection connection = DriverManager.getConnection(
-          "jdbc:sqlite:src/main/java/game/database/game_sessions.db");
+      Connection connection = DriverManager.getConnection(databaseUrl);
       try (Statement statement = connection.createStatement()) {
         statement.execute(
             "CREATE TABLE IF NOT EXISTS game_sessions "
@@ -32,7 +35,6 @@ public class DatabaseHandler {
                 + "won_duels INTEGER NOT NULL DEFAULT 0)"
         );
       }
-
       return connection;
     } catch (ClassNotFoundException | SQLException e) {
       throw new RuntimeException("Error initializing database", e);
@@ -122,11 +124,13 @@ public class DatabaseHandler {
         } else {
           // User does not exist, insert a new entry
           try (PreparedStatement insertStatement = connection.prepareStatement(
-              "INSERT INTO game_sessions (user_id, username, duration, won_duels) VALUES (?, ?, ?, 0)"
+              "INSERT INTO game_sessions (user_id, username, duration, won_duels) VALUES (?, ?, ?, ?)"
           )) {
             insertStatement.setLong(1, userId);
             insertStatement.setString(2, username);
             insertStatement.setLong(3, duration);
+            insertStatement.setLong(4, wonDuel ? 1 : 0);
+
             insertStatement.executeUpdate();
           }
         }
